@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Environments
+.venv/
+.env
+
+# VSCode
+.vscode/
+
+# Byte-compiled / caches
+*.egg-info/
