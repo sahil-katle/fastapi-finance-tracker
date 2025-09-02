@@ -107,3 +107,38 @@ Each door has a label (path), a lock (method), and rules (schemas + status codes
   - `.limit(limit)` → cap number of rows
   - `.offset(offset)` → skip rows
 - `.all()` → returns a list of Transaction objects.
+
+# Routers in Fastapi 
+In FastAPI, a **router** is a way to group related endpoints together.
+- Instead of keeping all routes in `main.py`, you split them by feature/module.
+
+## How to Define a Router
+1. Import and create a router instance:
+   ```python
+   from fastapi import APIRouter
+
+   router = APIRouter(
+       prefix="/transactions",   # all endpoints start with /transactions
+       tags=["transactions"]     # label in Swagger UI
+   )
+  
+# Advanced GET/Transactions (Query Parameters filtering)
+- Usual practice to narrow the results 
+
+- Filters like "Show only expenses" OR "Show items between specific dates" 
+
+## Pagination Envelope / Response Envelope 
+- Instead of returning a bare list, we are returnng JSON object with metadata + items.
+
+eg:
+```
+ {
+  "items": [...],
+  "total": 42,
+  "limit": 10,
+  "offset": 0
+}
+```
+
+- For this first create a new response envelope schema which will have the list of ites, total, limit & offset
+
