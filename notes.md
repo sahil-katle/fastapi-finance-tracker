@@ -128,7 +128,7 @@ In FastAPI, a **router** is a way to group related endpoints together.
 - Filters like "Show only expenses" OR "Show items between specific dates" 
 
 ## Pagination Envelope / Response Envelope 
-- Instead of returning a bare list, we are returnng JSON object with metadata + items.
+- Instead of returning a bare list, we are returning JSON object with metadata + items.
 
 eg:
 ```
@@ -141,4 +141,27 @@ eg:
 ```
 
 - For this first create a new response envelope schema which will have the list of ites, total, limit & offset
+
+
+# Authentication
+
+- We will use ```pip install "passlib[bcrypt]"```
+
+- bcrypt is a strong hashing algorithm -> passwords are never stored in plaintext or reversible form -> Basically on login, bcrypt verifies the submitted password with stored hash. 
+
+## Security.py 
+- We declare the context manager for hashing as well as 2 function - one to hash the passswords and other to verify the password. 
+
+## Schemas.py
+- Created 2 more schemas.
+- for userCreate which will be used -> Request body when a new user signs up (POST /auth/signup) 
+- for UserOut -> Request body when a new user signs up (POST /auth/signup)
+
+## Create a new router/auth.py
+
+
+
+
+
+
 

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import or_  # Helps build OR condition in SQLAlchemy
 from datetime import date
+from routers.auth import get_current_user
 
 import models, schemas
 from db import SessionLocal
@@ -31,6 +32,7 @@ def create_transaction(payload: schemas.TransactionCreate, db: Session = Depends
 @router.get("", response_model=schemas.TransactionListOut)
 def list_transactions(
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
     # pagination
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),

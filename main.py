@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from routers.transactions import router as transactions_router
+from routers.auth import router as auth_router
 
 import models, schemas
 from db import engine, Base
@@ -16,3 +17,4 @@ def health():
 
 # mount transactions endpoints
 app.include_router(transactions_router)
+app.include_router(auth_router)

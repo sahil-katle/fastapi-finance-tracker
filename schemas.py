@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, EmailStr
 from typing import Optional, Literal, List
 from datetime import date , datetime
 
@@ -53,3 +53,23 @@ class TransactionListOut(BaseModel):
     total: int
     limit: int
     offset: int
+
+# Input schema
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+#Output schema
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+
+    class Config:
+        from_attributes: True # allows converting SQLAlchemy objects -> Pydantic model
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    
+
+
