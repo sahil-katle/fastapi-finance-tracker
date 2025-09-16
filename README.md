@@ -57,25 +57,6 @@ Currently supports **CRUD** operations for transactions, **JWT-based authenticat
   - One User → Many Transactions  
   - A Transaction → Belongs to one User  
 
-### Diagram
-```mermaid
-erDiagram
-    USER ||--o{ TRANSACTION : has
-    USER {
-        int id PK
-        string email
-        string hashed_password
-        datetime created_at
-    }
-    TRANSACTION {
-        int id PK
-        int user_id FK
-        decimal amount
-        string currency
-        string description
-        datetime created_at
-    }
-
 ---
 
 ## 🚀 Getting Started
