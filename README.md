@@ -30,17 +30,51 @@ Currently supports **CRUD** operations for transactions, **JWT-based authenticat
 
 ---
 
-## 📂 Project Structure
+## Models & Relationships
 
-```
-fastapi-finance-tracker/
-├── db.py          # Database setup (engine, session, Base)
-├── models.py      # SQLAlchemy models (Transaction)
-├── schemas.py     # Pydantic schemas for request/response
-├── main.py        # FastAPI app + endpoints
-├── notes.md       # Personal learning notes
-├── .gitignore     # Ignore venv, db, cache files
-```
+### User
+- Represents a single registered user.  
+- Fields:  
+  - `id` (primary key)  
+  - `email` (unique)  
+  - `hashed_password` (bcrypt hashed)  
+  - `created_at` (timestamp)  
+- One **User** can have many **Transactions**.
+
+### Transaction
+- Represents a single financial transaction (income or expense).  
+- Fields:  
+  - `id` (primary key)  
+  - `user_id` (foreign key → `User.id`)  
+  - `amount` (numeric, positive for income / negative for expense, or use `type` enum)  
+  - `currency` (e.g., "USD")  
+  - `description` (optional text)  
+  - `created_at` (timestamp)  
+- Each **Transaction** belongs to exactly one **User**.
+
+### Relationship
+- **One-to-Many**  
+  - One User → Many Transactions  
+  - A Transaction → Belongs to one User  
+
+### Diagram
+```mermaid
+erDiagram
+    USER ||--o{ TRANSACTION : has
+    USER {
+        int id PK
+        string email
+        string hashed_password
+        datetime created_at
+    }
+    TRANSACTION {
+        int id PK
+        int user_id FK
+        decimal amount
+        string currency
+        string description
+        datetime created_at
+    }
 
 ---
 
