@@ -1,9 +1,11 @@
-from sqlalchemy import Column, Integer, Date, String, Numeric, Text, DateTime, func, Boolean
+from sqlalchemy import Column, Integer, Date, String, Numeric, Text, DateTime, func, Boolean, ForeignKey
 from db import Base
 
 class Transaction(Base):
     __tablename__ = "transactions"
     id = Column(Integer, primary_key=True, index=True)
+    # Foreign key (users model)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
     description = Column(String(200), nullable=False, index=True)
     amount = Column(Numeric(12,2), nullable=False) # 12 digits total and 2 decimal places
     kind = Column(String(10), nullable=False, index=True)

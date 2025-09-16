@@ -157,11 +157,128 @@ eg:
 - for userCreate which will be used -> Request body when a new user signs up (POST /auth/signup) 
 - for UserOut -> Request body when a new user signs up (POST /auth/signup)
 
-## Create a new router/auth.py
+## User Model & Schemas
+- **User model (SQLAlchemy):**
+  - `id`, `email` (unique), `hashed_password`, `is_active`.
+- **Schemas:**
+  - `UserCreate` → request body for signup (`{ email, password }`).
+  - `UserOut` → safe response (returns `{ id, email }`, never password).
+  - `Token` → response for login (`{ access_token, token_type }`).
+
+## Signup Flow (`POST /auth/signup`)
+1. Client sends `{ email, password }`.
+2. API:
+   - Validates email with `EmailStr`.
+   - Checks if email already exists.
+   - Hashes password with bcrypt.
+   - Stores user with `hashed_password`.
+3. Returns `UserOut` (id + email).
+
+---
+
+## Login Flow (`POST /auth/login`)
+1. Client sends `{ email, password }`.
+2. API:
+   - Finds user by email.
+   - Verifies plain password vs hashed password.
+   - If valid → creates **JWT access token** with user id in `sub`.
+3. Returns `{ access_token, token_type: "bearer" }`.
+
+# ---JWT--------
+
+# JWT (JSON Web Token)
+
+## What is JWT?
+- JWT is just a **string** (a token) that proves who you are.
+- Think of it like a **movie ticket**:
+  - It has your name/seat (data inside).
+  - It’s signed/stamped so the cinema knows it’s valid.
+  - You don’t log in at the counter again — just show the ticket.
+
+---
+
+## Why do we need JWT?
+- Without tokens: the server would have to **remember every user** that logged in (sessions in memory).  
+- With JWT: the **token itself carries the proof** → server doesn’t store anything extra.  
+- Client includes the token in every request → server checks it quickly.
+
+---
+
+## Naive Example
+
+### Without JWT
+1. You sign in → server remembers `you = logged_in` in memory.
+2. Every time you ask for `/transactions`, server checks its memory to see if you’re logged in.
+3. If the server restarts, memory is wiped → you’re logged out everywhere.
+
+### With JWT
+1. You sign in → server gives you a **token** (like `eyJhbGciOi...`).
+2. This token says: `"sub": 1` (you are user with id=1) and `"exp": "in 12 hours"`.
+3. You store this token in your client (browser, mobile app).
+4. Every request → you send: Authorization: Bearer <token> 
+
+5. Server just:
+- Checks the signature (is it real?).
+- Reads `sub = 1` → knows you’re user 1.
+- Doesn’t need to remember anything else.
+
+---
+
+## In Our App (Finance Tracker)
+- On **login**: we create a JWT with:
+- `sub`: user id  
+- `exp`: expiry time
+- On each request:
+- Swagger (or your frontend) attaches the token.
+- `get_current_user` decodes it.
+- Server instantly knows *which user is calling*.
+
+---
+
+## Benefits
+- **Stateless** → server doesn’t store sessions.
+- **Secure** → signed with secret key, cannot be forged.
+- **Portable** → works in Swagger, Postman, frontend apps.
+- **Scoped** → each user’s data is kept separate using their `sub` (id) from the token.
+
+## Access protected endpoints 
+- get_current_user = ticket checker 🛂
+- Makes sure the JWT is valid and belongs to a real user.
+- Returns that user → so endpoints know who is calling.
+- Will be added to every protected endpoint in the future.
 
 
+--------------------------------------------------------------------
 
 
+# **Connecting Transactions and Users model**
+
+- Open models.py and add a foreign key on the Transaction table. This establishes one-to-many relationship:
+**One user → many transactions**
+
+- Ensures every transaction is linked to a user 
+
+## What we did for Access-Protected Endpoints
+- Added security layers so only valid users can access certain API routes.
+Process:
+- User authentication → check credentials (e.g., email + password) and issue a token.
+- Token required → user must send this token in each request (commonly in the Authorization header).
+- Authorization check → system verifies whether the authenticated user is allowed to access that specific resource or action.
+- If valid → grant access; else → return 401 Unauthorized or 403 Forbidden.
+- Applied this to endpoints like /transactions to prevent anonymous or unauthorized access.
+
+# Authentication vs Authorization
+**Authentication = "Who are you?"**
+Confirms the user’s identity (login with email/password).
+Example: Showing your ID card at the entrance.
+
+**Authorization = "What are you allowed to do?"**
+Checks the user’s permissions after authentication.
+Example: Having an entry pass that says you’re allowed to enter only the library but not the server room.
+
+**In our app:**
+***Authentication*** = user logs in and gets a token (like the ticket).
+***Authorization*** = token is checked against rules (can this user access /transactions? which ones?).
 
 
 

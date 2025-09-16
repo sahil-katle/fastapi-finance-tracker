@@ -21,8 +21,11 @@ def get_db():
 
 # ---------- CREATE ----------
 @router.post("", response_model=schemas.TransactionOut, status_code=status.HTTP_201_CREATED)
-def create_transaction(payload: schemas.TransactionCreate, db: Session = Depends(get_db)):
-    tx = models.Transaction(**payload.model_dump())
+def create_transaction(payload: schemas.TransactionCreate, 
+                       db: Session = Depends(get_db), 
+                       current_user=Depends(get_current_user)
+                       ):
+    tx = models.Transaction(user_id=current_user.id, **payload.model_dump())
     db.add(tx)
     db.commit()
     db.refresh(tx)
@@ -45,7 +48,7 @@ def list_transactions(
     min_amount: Optional[float] = Query(None, gt=0),
     max_amount: Optional[float] = Query(None, gt=0),
 ):
-    query = db.query(models.Transaction)
+    query = db.query(models.Transaction).filter(models.Transaction.user_id == current_user.id)
 
     #apply filters if provided
     if start_date:
@@ -88,16 +91,18 @@ def list_transactions(
 
 # ---------- GET ONE ----------
 @router.get("/{tx_id}", response_model=schemas.TransactionOut)
-def get_transaction(tx_id: int, db: Session = Depends(get_db)):
-    tx = db.get(models.Transaction, tx_id)
+def get_transaction(tx_id: int, db: Session = Depends(get_db),
+                    current_user=Depends(get_current_user)):
+    tx = db.query(models.Transaction).filter(models.Transaction.id == tx_id,
+                                           models.Transaction.user_id == current_user.id).first()
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
     return tx
 
 # ---------- UPDATE ----------
 @router.put("/{tx_id}", response_model=schemas.TransactionOut)
-def update_transaction(tx_id: int, payload: schemas.TransactionUpdate, db: Session = Depends(get_db)):
-    tx = db.get(models.Transaction, tx_id)
+def update_transaction(tx_id: int, payload: schemas.TransactionUpdate, db: Session = Depends(get_db), current_user= Depends(get_current_user)):
+    tx = db.query(models.Transaction).filter(models.Transaction.id == tx_id, models.Transaction.user_id == current_user.id).first()
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
 
@@ -105,15 +110,15 @@ def update_transaction(tx_id: int, payload: schemas.TransactionUpdate, db: Sessi
     for k, v in changes.items():
         setattr(tx, k, v)
 
-    db.add(tx)
+    # db.add(tx)
     db.commit()
     db.refresh(tx)
     return tx
 
 # ---------- DELETE ----------
 @router.delete("/{tx_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_transaction(tx_id: int, db: Session = Depends(get_db)):
-    tx = db.get(models.Transaction, tx_id)
+def delete_transaction(tx_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    tx = db.query(models.Transaction).filter(models.Transaction.id == tx_id, models.Transaction.user_id == current_user.id).first()
     if not tx:
         raise HTTPException(status_code=404, detail="Transaction not found")
     db.delete(tx)
