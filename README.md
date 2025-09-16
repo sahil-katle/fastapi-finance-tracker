@@ -1,21 +1,32 @@
 # FastAPI Finance Tracker
 
 A backend API built with **FastAPI** and **SQLAlchemy ORM** to track personal finance.  
-Currently supports full **CRUD** operations for transactions with input validation using **Pydantic**.
+Currently supports **CRUD** operations for transactions, **JWT-based authentication**, password hashing using **bcrypt** algorithm and **access-protected endpoints**.
 
 ---
 
 ## ✨ Features (current progress)
 
-- ✅ **CRUD** for transactions:
+- ✅ **Users ↔ Transactions** relationship (one-to-many via `transactions.user_id` FK)
+- ✅ **CRUD** for transactions
   - `POST /transactions` → create a transaction
-  - `GET /transactions` → list transactions (with pagination)
+  - `GET /transactions` → list transactions (with pagination + filtering)
   - `GET /transactions/{id}` → fetch a single transaction
-  - `PUT /transactions/{id}` → update an existing transaction
+  - `PUT /transactions/{id}` → update a transaction
   - `DELETE /transactions/{id}` → delete a transaction
+- ✅ **Pagination, filtering, and sorting** for listing transactions  
+  - `?skip=0&limit=20` → pagination  
+  - `?from=YYYY-MM-DD&to=YYYY-MM-DD` → filter by date range  
+  - `?type=income|expense` → filter by transaction type  
+  - `?min_amount=&max_amount=` → filter by amount range  
+  - `?order_by=created_at&direction=desc` → sorting
 - ✅ **Validation** with Pydantic schemas
-- ✅ **SQLite** for persistence
-- ✅ Auto-generated **Swagger docs** at `/docs`
+- ✅ **Password hashing (bcrypt)**  
+  - Passwords are **never stored in plain text**.  
+  - On signup, passwords are **hashed with bcrypt**; on login, we **verify via hash comparison**.
+- ✅ **JWT Authentication** (`/auth/signup`, `/auth/login`)
+- ✅ **Access-protected endpoints** (require `Authorization: Bearer <token>`)
+- ✅ **Per-user transactions** (multi-user support) 
 
 ---
 
@@ -73,10 +84,6 @@ Now open: 👉 [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 ---
 
 ## 📌 Roadmap
-
-- [ ] Add **filters** (date range, category, amount, search) to list endpoint  
-- [ ] Add **user authentication** with JWT  
-- [ ] Per-user transactions (multi-user support)  
 - [ ] Monthly & category-based reports  
 - [ ] Budget alerts (80/90/100%)  
 - [ ] CSV/Excel export  
